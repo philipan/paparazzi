@@ -158,7 +158,7 @@ static inline void on_gps_solution(void);
 #endif
 
 /** Paparazzi version */
-static const uint16_t version = PPRZ_VERSION_INT;
+static const uint16_t version = PPRZ_VERSION_INT16;
 
 #if defined RADIO_CONTROL || defined RADIO_CONTROL_AUTO1
 static uint8_t  mcu1_ppm_cpt;

@@ -183,7 +183,12 @@
     <field name="segment_north_2" type="float" unit="m"/>
   </message>
 
-  <!-- ID 23 is free -->
+  <message name="AUTOPILOT_VERSION" id="23">
+    <field name="version" type="uint32"/>
+    <field name="git_sha1" type="uint8[8]" format="%x"/>
+    <field name="desc" type="char[]"/>
+  </message>
+
   <!-- ID 24 is free -->
 
   <message name="SVINFO" id="25">

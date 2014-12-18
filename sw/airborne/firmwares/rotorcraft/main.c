@@ -115,7 +115,9 @@ INFO_VALUE("it is recommended to configure in your airframe PERIODIC_FREQUENCY t
 #endif
 
 /** Paparazzi version */
-static const uint16_t version = PPRZ_VERSION_INT;
+static const uint16_t version = PPRZ_VERSION_INT16;
+static uint32_t ap_version = PPRZ_VERSION_INT32;
+static uint8_t git_version[8];
 
 static inline void on_gyro_event(void);
 static inline void on_accel_event(void);
@@ -148,6 +150,7 @@ int main(void)
 
 STATIC_INLINE void main_init(void)
 {
+  get_pprz_git_version(git_version);
 
   mcu_init();
 
@@ -253,8 +256,13 @@ STATIC_INLINE void telemetry_periodic(void)
 
   /* initialisation phase during boot */
   if (boot) {
+#if DOWNLINK
     uint16_t non_const_version = version;
     DOWNLINK_SEND_BOOT(DefaultChannel, DefaultDevice, &non_const_version);
+    char *ver_desc = PPRZ_VERSION_DESC;
+    DOWNLINK_SEND_AUTOPILOT_VERSION(DefaultChannel, DefaultDevice,
+                                    &ap_version, git_version, strlen(ver_desc), ver_desc);
+#endif
     boot = FALSE;
   }
   /* then report periodicly */

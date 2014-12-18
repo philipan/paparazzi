@@ -302,7 +302,7 @@ static inline void mavlink_send_params(void)
 static inline void mavlink_send_autopilot_version(void)
 {
   /// TODO: fill in versions correctly, how should they be encoded?
-  static uint32_t ver = PPRZ_VERSION_INT;
+  static uint32_t ver = PPRZ_VERSION_INT32;
   mavlink_msg_autopilot_version_send(MAVLINK_COMM_0,
                                      0,  // capabilities,
                                      ver, // version

@@ -48,8 +48,11 @@
 #define PPRZ_VERSION_DESC  STRINGIFY(GIT_DESC)
 #define PPRZ_VERSION       STRINGIFY(PPRZ_VER)
 
-/** paparazzi version encoded as one integer */
-#define PPRZ_VERSION_INT (PPRZ_VER_MAJOR * 100 + PPRZ_VER_MINOR * 10 + PPRZ_VER_PATCH)
+/** paparazzi version encoded as one 16bit integer */
+#define PPRZ_VERSION_INT16 (PPRZ_VER_MAJOR * 100 + PPRZ_VER_MINOR * 10 + PPRZ_VER_PATCH)
+
+/** paparazzi version encoded as one 32bit integer */
+#define PPRZ_VERSION_INT32 (PPRZ_VER_MAJOR * 10000 + PPRZ_VER_MINOR * 100 + PPRZ_VER_PATCH)
 
 static inline uint8_t nibble_from_char(char c)
 {
