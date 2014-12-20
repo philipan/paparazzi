@@ -90,17 +90,17 @@ external sprint_int8 : string -> int -> int -> unit = "c_sprint_int8"
 
 let types = [
   ("uint8",  { format = "%u"; glib_type = "guint8"; inttype = "uint8_t";  size = 1; value=Int 42 });
-  ("uint16", { format = "%u";  glib_type = "guint16"; inttype = "uint16_t"; size = 2; value=Int 42 });
-  ("uint32", { format = "%lu" ;  glib_type = "guint32"; inttype = "uint32_t"; size = 4; value=Int 42 });
-  ("uint64", { format = "%Lu" ;  glib_type = "guint64"; inttype = "uint64_t"; size = 8; value=Int 42 });
+  ("uint16", { format = "%u"; glib_type = "guint16"; inttype = "uint16_t"; size = 2; value=Int 42 });
+  ("uint32", { format = "%u"; glib_type = "guint32"; inttype = "uint32_t"; size = 4; value=Int 42 });
+  ("uint64", { format = "%u"; glib_type = "guint64"; inttype = "uint64_t"; size = 8; value=Int 42 });
   ("int8",   { format = "%d"; glib_type = "gint8"; inttype = "int8_t";   size = 1; value= Int 42 });
-  ("int16",  { format = "%d";  glib_type = "gint16"; inttype = "int16_t";  size = 2; value= Int 42 });
-  ("int32",  { format = "%ld" ;  glib_type = "gint32"; inttype = "int32_t";  size = 4; value=Int 42 });
-  ("int64",  { format = "%Ld" ;  glib_type = "gint64"; inttype = "int64_t";  size = 8; value=Int 42 });
-  ("float",  { format = "%f" ;  glib_type = "gfloat"; inttype = "float";  size = 4; value=Float 4.2 });
-  ("double", { format = "%f" ;  glib_type = "gdouble"; inttype = "double";  size = 8; value=Float 4.2 });
-  ("char",   { format = "%c" ;  glib_type = "gchar"; inttype = "char";  size = 1; value=Char '*' });
-  ("string", { format = "%s" ;  glib_type = "gchar*"; inttype = "char*";  size = max_int; value=String "42" })
+  ("int16",  { format = "%d"; glib_type = "gint16"; inttype = "int16_t";  size = 2; value= Int 42 });
+  ("int32",  { format = "%d"; glib_type = "gint32"; inttype = "int32_t";  size = 4; value=Int 42 });
+  ("int64",  { format = "%d"; glib_type = "gint64"; inttype = "int64_t";  size = 8; value=Int 42 });
+  ("float",  { format = "%f"; glib_type = "gfloat"; inttype = "float";  size = 4; value=Float 4.2 });
+  ("double", { format = "%f"; glib_type = "gdouble"; inttype = "double";  size = 8; value=Float 4.2 });
+  ("char",   { format = "%c"; glib_type = "gchar"; inttype = "char";  size = 1; value=Char '*' });
+  ("string", { format = "%s"; glib_type = "gchar*"; inttype = "char*";  size = max_int; value=String "42" })
 ]
 
 let is_array_type = fun s ->
@@ -171,13 +171,6 @@ let rec string_of_value = function
 
 let magic = fun x -> (Obj.magic x:('a,'b,'c) Pervasives.format)
 
-(* FIXME temporary solution, the complete formatted_string_of_value function
-   causes a segfault in server and GCS *)
-let string_of_value_format = fun format v ->
-  match v with
-    Float x -> sprintf (magic format) x
-  | v -> string_of_value v
-
 let rec formatted_string_of_value = fun format v ->
   match v with
     | Int x -> sprintf (magic format) x
@@ -185,7 +178,7 @@ let rec formatted_string_of_value = fun format v ->
     | Int32 x -> sprintf (magic format) x
     | Int64 x -> sprintf (magic format) x
     | Char x -> sprintf (magic format) x
-    | String x -> sprintf (magic format) x
+    | String x -> string_of_value v
     | Array a ->
         let l = (Array.to_list (Array.map (formatted_string_of_value format) a)) in
         match a.(0) with
@@ -733,7 +726,7 @@ module MessagesOfXml(Class:CLASS_Xml) = struct
          try List.assoc field_name values with
              Not_found ->
                default_value field._type in
-       string_of_value_format field.fformat v)
+       formatted_string_of_value field.fformat v)
      msg.fields)
 
   let message_send = fun ?timestamp ?link_id sender msg_name values ->
