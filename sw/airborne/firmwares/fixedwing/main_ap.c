@@ -473,7 +473,7 @@ void reporting_task(void)
     DOWNLINK_SEND_AUTOPILOT_VERSION(DefaultChannel, DefaultDevice,
                                     &ap_version, git_version, strlen(ver_desc), ver_desc);
 #endif
-    //boot = FALSE;
+    boot = FALSE;
   }
   /* then report periodicly */
   else {
