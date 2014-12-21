@@ -1,0 +1,110 @@
+<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+
+<!--48.335991	10.897319-->
+
+	
+<flight_plan alt="600" ground_alt="497" lat0="48.327859" lon0="10.895083" max_dist_from_home="400" name="Basic" security_height="70" qfu="270">
+
+
+  <header>
+#include "subsystems/datalink/datalink.h"
+<!--#include "subsystems/navigation/OSAMNav.h"-->
+
+</header>
+
+  <waypoints>
+    <waypoint height="100." name="HOME" x="0.0" y="0.0"/>
+    <waypoint height="100.0" name="STDBY" x="-30" y="10"/>
+
+    <waypoint name="centre"  height="50.0" x="0" y="0"/>
+    <waypoint name="west"    height="50.0" x="-150" y="0"/>
+    <waypoint name="gonorth1" height="50.0" x="-200" y="150"/>
+    <waypoint name="gonorth2" height="50.0" x="0" y="250"/>
+    <waypoint name="north"   height="50.0" x="0" y="150"/>
+    <waypoint name="south"   height="50.0" x="0" y="-150"/>
+    <waypoint name="goeast1"  height="50.0" x="150" y="-150"/>
+    <waypoint name="goeast2"  height="50.0" x="250" y="0"/>
+    <waypoint name="east"    height="50.0" x="150" y="0"/>
+ 
+    <waypoint height="30.0" name="lower" x="-50" y="-100"/>
+    <waypoint height="300.0" name="upper" x="-50" y="-100"/>
+  </waypoints>
+  <exceptions>
+    <!--exception cond="datalink_time > 22" deroute="Standby"/-->
+  </exceptions>
+
+<!-- ------------------------------------------------------------------------- -->
+
+
+  <blocks>
+    <block name="Wait GPS">
+      <set value="1" var="kill_throttle"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+    <block name="Holding point">
+      <!--set var="nav_mode" value="NAV_MODE_ROLL"/-->
+      <set value="1" var="kill_throttle"/>
+      <attitude roll="0" throttle="0" vmode="throttle"/>
+    </block>
+
+<!-- ------------------------------------------------------------------------- -->
+
+    <block key="t" name="Takeoff" strip_button="Takeoff (wp STDBY)" strip_icon="takeoff.png" group="home">
+      <exception cond="GetPosAlt() > ground_alt+40" deroute="Standby"/>
+      <set value="0" var="kill_throttle"/>
+      <set value="0" var="autopilot_flight_time"/>
+      <go from="HOME" throttle="0.8" vmode="throttle" wp="STDBY" pitch="30"/>
+    </block>
+
+<!-- ------------------------------------------------------------------------- -->
+
+
+  <!--
+    <block group="meteo"  name="climb" strip_button="climb" strip_icon="up.png">
+      <exception cond="GetPosAlt() > ground_alt+300" deroute="descent"/>
+      <circle radius="45" wp="upper" climb="1.0" vmode="climb"/>
+    </block>
+    <block group="meteo"  name="descent" strip_button="Descent" strip_icon="down.png">
+      <exception cond="ground_alt+15 > GetPosAlt()" deroute="climb"/>
+      <circle radius="45" wp="lower" climb="-0.1" vmode="climb"/>
+    </block>
+  -->
+
+    <block group="meteo"  name="ascent" strip_button="ascent" strip_icon="up.png">
+      <exception cond="GetPosAlt() > ground_alt+304" deroute="descent"/>
+      <circle pitch="70" radius="50" wp="upper" throttle="0.8" vmode="throttle"/>
+    </block>
+    <block group="meteo"  name="descent" strip_button="descent" strip_icon="down.png">
+      <exception cond="ground_alt+40 > GetPosAlt()" deroute="ascent"/>
+      <circle pitch="0.0" radius="50" wp="lower" throttle="0.0" vmode="throttle"/>
+    </block>
+
+<!-- ------------------------------------------------------------------------- -->
+
+    <block key="Ctrl+a" name="Standby" strip_button="Standby" strip_icon="home.png" group="home">
+      <circle radius="nav_radius" wp="STDBY"/>
+    </block>
+
+
+    <block name="Path cross"  strip_button="Path (west-east, south-north)" strip_icon="path.png" group="extra_pattern">
+     <go approaching_time="0" from="centre" hmode="route" vmode="glide" wp="west"/>
+  <for var="i" from="1" to="5">
+     <go approaching_time="5.0" from="west" hmode="route" vmode="glide" wp="gonorth1"/>
+     <go approaching_time="6.0" from="gonorth1" hmode="route" vmode="glide" wp="gonorth2"/>
+     <go approaching_time="1.0" from="gonorth2" hmode="route" vmode="glide" wp="north"/>
+     <go approaching_time="0.0" from="north" hmode="route" vmode="glide" wp="south"/>
+     <go approaching_time="5.0" from="south" hmode="route" vmode="glide" wp="goeast1"/>
+     <go approaching_time="6.0" from="goeast1" hmode="route" vmode="glide" wp="goeast2"/>
+     <go approaching_time="1.0" from="goeast2" hmode="route" vmode="glide" wp="east"/>
+     <go approaching_time="0.0" from="east" hmode="route" vmode="glide" wp="west"/>
+  </for>
+      <!-- <path wpts="2,AF,TD" approaching_time="1" pitch="auto" throttle="0.0"/> -->
+      <deroute block="Standby"/>
+    </block>
+
+  </blocks>
+</flight_plan>

@@ -1,0 +1,150 @@
+<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+
+<!--48.302748, 10.917311-->
+
+	
+<flight_plan alt="600" ground_alt="500" lat0="48.302748" lon0="10.917311" max_dist_from_home="500" name="Vertical Profile" security_height="50" qfu="285">
+<header>
+	#include "subsystems/datalink/datalink.h"
+</header>
+
+<waypoints>
+	<waypoint height="100" name="HOME" x="0" y="0"/>
+	<waypoint height="100" name="STDBY_low" x="0" y="0"/>
+	<waypoint height="290" name="STDBY_high" x="0" y="0"/>
+
+	<waypoint height="280" name="climb" x="-80" y="0"/>
+	<waypoint height="280" name="upper" x="-60" y="-120"/>
+	<waypoint height="80" name="lower" x="-20" y="-80"/>
+
+	<waypoint height="305" name="spiral_forest" x="220" y="-50"/>
+	<waypoint height="305" name="spiral_forest_prepare" x="100" y="-50"/>
+	<waypoint height="305" name="spiral_grass" x="-20" y="50"/>
+	<waypoint height="305" name="spiral_grass_prepare" x="-50" y="-20"/>
+
+	<waypoint height="25" name="AF" x="50" y="20"/>
+	<waypoint height="20" name="take_down" x="-150" y="50"/>
+	<waypoint name="_BASELEG" x="0" y="0"/>
+</waypoints>
+
+
+<exceptions>
+	<exception cond="datalink_time > 22" deroute="Standby"/>
+
+	<exception cond="10 > PowerVoltage()" deroute="Land Left"/>
+
+	<!-- exception cond="ground_alt+40 > GetPosAlt()" deroute="Standby"/ -->
+</exceptions>
+
+
+<blocks>
+    <block name="Wait GPS">
+      <set value="1" var="kill_throttle"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+    <block name="Holding point">
+      <!--set var="nav_mode" value="NAV_MODE_ROLL"/-->
+      <set value="1" var="kill_throttle"/>
+      <attitude roll="0" throttle="0" vmode="throttle"/>
+    </block>
+
+<!-- --------------------------------------------------------------- -->
+	<block name="takeoff" strip_button="takeoff (wp climb)" strip_icon="takeoff.png" group="home">
+	 <exception cond="GetPosAlt() > ground_alt+40" deroute="Standby"/>
+	 <set value="0" var="kill_throttle"/>
+	 <set value="0" var="autopilot_flight_time"/>
+	 <go from="HOME" throttle="1.0" vmode="throttle" wp="climb" pitch="20"/>
+	</block>
+
+	<block name="Standby" strip_button="Standby" strip_icon="home.png" group="home">
+	 <circle radius="60" wp="STDBY_low"/>
+	</block>
+
+<!-- --------------------------------------------------------------- -->
+	<block group="meteo" name="climb" strip_button="climb" strip_icon="up.png">
+	 <exception cond="GetPosAlt() > ground_alt+300" deroute="descent"/>
+	 <circle radius="50" wp="upper" climb="1.0" vmode="climb"/>
+	</block>
+	<block group="meteo" name="descent" strip_button="descent" strip_icon="down.png">
+	 <exception cond="ground_alt+40 > GetPosAlt()" deroute="climb"/>
+	 <circle radius="45" wp="lower" climb="-0.1" vmode="climb"/>
+	</block>
+
+<!-- --------------------------------------------------------------- -->
+	<block group="Forest" name="prepare_spiral_forest" strip_button="Prepare Spiral over Forest" strip_icon="mob.png">
+	 <exception cond="ground_alt+50 > GetPosAlt()" deroute="Standby_low"/>
+	 <exception cond="GetPosAlt() > ground_alt+305" deroute="spiral_forest"/>
+	 <circle radius="50" wp="spiral_forest" vmode="throttle" pitch="5" throttle="1.00"/>
+	</block>
+	<block group="Forest" name="spiral_forest" strip_button="Start Spiral Forest" strip_icon="circle-right.png">
+	 <exception cond="ground_alt+50 > GetPosAlt()" deroute="Standby_low"/>
+	 <circle radius="50" wp="spiral_forest" pitch="-5" vmode="throttle" throttle="0.10"/>
+	</block>
+
+	<block group="Grass" name="prepare_spiral_grass" strip_button="Prepare Spiral over Grassland" strip_icon="mob.png">
+	 <exception cond="ground_alt+50 > GetPosAlt()" deroute="Standby_low"/>
+	 <exception cond="GetPosAlt() > ground_alt+305" deroute="spiral_grass"/>
+	 <circle radius="50" wp="spiral_grass" vmode="throttle" pitch="5" throttle="1.00"/>
+	</block>
+	<block group="Grass" name="spiral_grass" strip_button="Start Spiral Grassland" strip_icon="circle-right.png">
+	 <exception cond="ground_alt+50 > GetPosAlt()" deroute="Standby_low"/>
+	 <circle radius="50" wp="spiral_grass" pitch="-5" vmode="throttle" throttle="0.10"/>
+	</block>
+
+	<block name="Standby_low">
+	 <circle radius="60" wp="STDBY_low"/>
+	</block>
+	<block name="Standby_high">
+	 <circle radius="60" wp="STDBY_high"/>
+	</block>
+
+
+
+	<block name="start_profiling" strip_button="Start automatic profiling (Grass -> Forest -> Landing)" strip_icon="observe.png">
+		<set value="0" var="kill_throttle"/>
+		<set value="0" var="autopilot_flight_time"/>
+		<heading course="QFU" vmode="throttle" throttle="1.00" pitch="20" until="GetPosAlt() > ground_alt+25"/>
+		<circle radius="50" wp="upper" vmode="throttle" pitch="7" throttle="1.00" until="GetPosAlt() > ground_alt+270"/>
+		<go wp="spiral_forest_prepare" approaching_time="1"/>
+		<circle radius="50" wp="spiral_forest" vmode="alt" until="stage_time > 30"/>
+		<circle radius="50" wp="spiral_forest" pitch="-5" vmode="throttle" throttle="0.10" until="ground_alt+75 > GetPosAlt()"/>
+		<circle radius="50" wp="upper" vmode="throttle" pitch="7" throttle="1.00" until="GetPosAlt() > ground_alt+270"/>
+		<go wp="spiral_grass_prepare" approaching_time="1"/>
+		<circle radius="50" wp="spiral_grass" vmode="alt" until="stage_time > 30"/>
+		<circle radius="50" wp="spiral_grass" pitch="-5" vmode="throttle" throttle="0.10" until="ground_alt+75 > GetPosAlt()"/>
+		<deroute block="Land Left"/>
+	</block>
+
+<!-- ---------------------------------------------------------------- -->
+	<block name="Land Right" strip_button="Land right" strip_icon="land-right.png" group="land">
+	 <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+	 <deroute block="land"/>
+	</block>
+
+	<block name="Land Left" strip_button="Land left" strip_icon="land-left.png" group="land">
+	 <set value="-DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+	 <deroute block="land"/>
+	</block>
+
+	<block name="land">
+	 <call fun="nav_compute_baseleg(WP_AF, WP_take_down, WP__BASELEG, nav_radius)"/>
+	 <circle radius="nav_radius" until="NavCircleCount() > 0.5" wp="_BASELEG"/>
+	 <circle radius="nav_radius" until="And(NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-(nav_radius/fabs(nav_radius))*10), 10 > fabs(GetPosAlt() - WaypointAlt(WP__BASELEG)))" wp="_BASELEG"/>
+	</block>
+
+	<block name="final">
+	 <exception cond="ground_alt + 10 > GetPosAlt()" deroute="flare"/>
+	 <go from="AF" hmode="route" vmode="glide" wp="take_down"/>
+	</block>
+
+	<block name="flare">
+	 <go approaching_time="0" from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="take_down"/>
+	 <attitude roll="0.0" throttle="0.0" until="FALSE" vmode="throttle"/>
+	</block>
+
+</blocks>
+</flight_plan>
