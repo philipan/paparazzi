@@ -108,6 +108,7 @@ print_build_version:
 	@echo "------------------------------------------------------------"
 	@echo "Building Paparazzi version" $(shell ./paparazzi_version)
 	@echo "------------------------------------------------------------"
+	$(Q)./paparazzi_version > $(PAPARAZZI_HOME)/var/build_version.txt
 
 update_google_version:
 	-$(MAKE) -C data/maps
