@@ -1,0 +1,14 @@
+git remote add igua
+ git remote add igua git@github.com:philipan/paparazzi.git
+ git remote -v
+git fetch igua
+git branch -a
+git checkout -b astab_no1fpv origin/master
+ git branch -l
+git branch -vv
+ git pull
+ git add .
+git commit -m "sd-log for sht and ets-airspeed"
+git push igua astab_no1fpv:astab_no1fpv_r
+ git branch -a
+git pull
