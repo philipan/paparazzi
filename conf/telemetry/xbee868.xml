@@ -7,7 +7,7 @@
       <message name="NAVIGATION"     period="3."	phase="0."/>
       <message name="GPS"	     period="3."	phase="0."/>
 
-      <message name="ATTITUDE"       period="6."	phase="0"/>
+      <message name="ATTITUDE"       period="2."	phase="0"/>
       <message name="DL_VALUE"       period="3."	phase="0"/>
       <message name="WP_MOVED"       period="6."	phase="3"/>
 
