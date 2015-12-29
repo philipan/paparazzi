@@ -26,11 +26,11 @@
     <load name="airspeed_ets.xml">
       <define name="AIRSPEED_ETS_SYNC_SEND"/>
       <define name="USE_I2C2"/> 
-      <define name="AIRSPEED_ETS_I2C_DEV" value="i2c2"/>
+      <configure name="AIRSPEED_ETS_I2C_DEV" value="i2c2"/>
       <define name="AIRSPEED_ETS_SDLOG" value="TRUE"/> 
     </load>
     <load name="temp_temod.xml">
-      <define name="TEMOD_I2C_DEV" value="i2c1"/>
+      <configure name="TEMOD_I2C_DEV" value="i2c1"/>
       <define name="TEMP_TEMOD_SDLOG" value="TRUE"/>
     </load>
 <!-- UNIA END -->
@@ -75,7 +75,7 @@
 <!-- UNIA START -->
     <subsystem name="telemetry" type="transparent">
       <configure name="MODEM_BAUD"  value="B19200"/>
-<!--       <configure name="MODEM_BAUD"  value="B57600"/> -->
+      <configure name="MODEM_BAUD"  value="B57600"/>
       <configure name="MODEM_PORT"  value="UART1"/>
       <define name="TELEMETRY_MODE_FBW" value="2"/>
     </subsystem>

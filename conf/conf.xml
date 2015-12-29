@@ -2,10 +2,10 @@
   <aircraft
    name="AULA_A2_I"
    ac_id="15"
-   airframe="airframes/AULA/AULA_A2_I_0.01.xml"
-   radio="radios/mx-16-igua8.xml"
+   airframe="airframes/AULA/AULA_A2_I_0.02.xml"
+   radio="radios/mx-16.xml"
    telemetry="telemetry/fixedwing_flight_recorder.xml"
-   flight_plan="flight_plans/ScaleX/ASTAB_ScaleX_Sandwich3s_0300_FLYINGWING.xml"
+   flight_plan="flight_plans/AULA/ASTAB_Operational_Measurements_UniAugsburg.xml"
    settings="settings/fixedwing_basic.xml"
    settings_modules="modules/air_data.xml modules/gps_ubx_ucenter.xml modules/nav_survey_poly_osam.xml"
    gui_color="blue"
@@ -30,6 +30,17 @@
    flight_plan="flight_plans/ScaleX/ASTAB_ScaleX_0300_FMN3_NW_ARCUSSPORT.xml"
    settings="settings/fixedwing_basic.xml"
    settings_modules="modules/air_data.xml modules/gps_ubx_ucenter.xml"
+   gui_color="blue"
+  />
+  <aircraft
+   name="AULA_FUNJET_I"
+   ac_id="2"
+   airframe="airframes/AULA/AULA_FUNJET_I_01.xml"
+   radio="radios/mx-16.xml"
+   telemetry="telemetry/fixedwing_flight_recorder.xml"
+   flight_plan="flight_plans/AULA/ASTAB_Operational_Measurements_UniAugsburg.xml"
+   settings="settings/fixedwing_basic.xml"
+   settings_modules="modules/air_data.xml modules/gps_ubx_ucenter.xml modules/nav_survey_poly_osam.xml"
    gui_color="blue"
   />
   <aircraft
@@ -63,6 +74,17 @@
    flight_plan="flight_plans/ScaleX/ASTAB_ScaleX_0300_FMN1_CN_FLYINGWING.xml"
    settings="settings/fixedwing_basic.xml"
    settings_modules="modules/gps_ubx_ucenter.xml"
+   gui_color="blue"
+  />
+  <aircraft
+   name="AULA_XENO_I"
+   ac_id="1"
+   airframe="airframes/AULA/AULA_XENO_I_01.xml"
+   radio="radios/mx-16.xml"
+   telemetry="telemetry/fixedwing_flight_recorder.xml"
+   flight_plan="flight_plans/AULA/ASTAB_Operational_Measurements_UniAugsburg.xml"
+   settings="settings/fixedwing_basic.xml"
+   settings_modules="modules/air_data.xml modules/gps_ubx_ucenter.xml modules/nav_survey_poly_osam.xml"
    gui_color="blue"
   />
   <aircraft

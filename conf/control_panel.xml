@@ -146,6 +146,19 @@
       </program>
       <program name="Messages"/>
     </session>
+    <session name="USB3@57600">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/ttyUSB3"/>
+        <arg flag="-s" constant="57600"/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-maps_fill"/>
+        <arg flag="-speech"/>
+        <arg flag="-layout" constant="ua.xml"/>
+      </program>
+      <program name="Messages"/>
+    </session>
     <session name="ARDrone2 Flight">
       <program name="Server"/>
       <program name="GCS"/>
@@ -208,6 +221,19 @@
       </program>
       <program name="Server"/>
       <program name="GCS"/>
+    </session>
+    <session name="USB2@57600">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/ttyUSB2"/>
+        <arg flag="-s" constant="57600"/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-maps_fill"/>
+        <arg flag="-speech"/>
+        <arg flag="-layout" constant="ua.xml"/>
+      </program>
+      <program name="Messages"/>
     </session>
     <session name="Flight USB-XBee-API@57600">
       <program name="Data Link">
