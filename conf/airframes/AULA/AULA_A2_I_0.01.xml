@@ -35,13 +35,14 @@
     <load name="airspeed_ets.xml">
       <define name="AIRSPEED_ETS_SYNC_SEND"/>
       <define name="USE_I2C2"/> 
-      <define name="AIRSPEED_ETS_I2C_DEV" value="i2c2"/>
+      <configure name="AIRSPEED_ETS_I2C_DEV" value="i2c2"/>
       <define name="AIRSPEED_ETS_SDLOG" value="TRUE"/> 
     </load>
     <load name="temp_temod.xml">
-      <define name="TEMOD_I2C_DEV" value="i2c1"/>
+      <configure name="TEMOD_I2C_DEV" value="i2c1"/>
       <define name="TEMP_TEMOD_SDLOG" value="TRUE"/>
     </load>
+
 <!-- UNIA END -->
 
    <load name="nav_line_border.xml"/>
