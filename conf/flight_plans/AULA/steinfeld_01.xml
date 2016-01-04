@@ -1,10 +1,14 @@
 <!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
 <!-- 
 <flight_plan alt="360" ground_alt="289" lat0="49.950038" lon0="9.654804" max_dist_from_home="500" name="Steinfeld_" security_height="50">
-
+-->
+<!--
 <flight_plan alt="330" ground_alt="269" lat0="49.953363" lon0="9.667030" max_dist_from_home="500" name="Steinfeld_Hof_" security_height="50">
 -->
+<flight_plan alt="330" ground_alt="269" lat0="49.953224" lon0="9.667124" max_dist_from_home="500" name="Steinfeld_Whg_" security_height="50">
+<!--
 <flight_plan alt="450" ground_alt="381" lat0="49.826844" lon0="11.194715" max_dist_from_home="500" name="Uleilei_" security_height="50">
+-->
 <header>
 #include "subsystems/datalink/datalink.h"
 </header>
@@ -25,6 +29,8 @@
     <block name="Geo init">
       <while cond="LessThan(NavBlockTime(), 10)"/>
       <!-- <call fun="NavSetGroundReferenceHere()"/> -->
+      <!-- <call fun="NavSetAltitudeReferenceHere()"/>-->
+      <!--<set var="air_data.calc_qnh_once" value="TRUE"/>-->
     </block>
 
     <block name="Waiting for Remote Control">

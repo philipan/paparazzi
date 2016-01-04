@@ -158,6 +158,9 @@
         <arg flag="-layout" constant="ua.xml"/>
       </program>
       <program name="Messages"/>
+      <program name="Real-time Plotter"/>
+      <program name="Real-time Plotter"/>
+      <program name="Real-time Plotter"/>
     </session>
     <session name="ARDrone2 Flight">
       <program name="Server"/>

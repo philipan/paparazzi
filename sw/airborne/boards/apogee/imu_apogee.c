@@ -213,7 +213,9 @@ void imu_apogee_event(void)
 
 #ifdef MPU9150_SLV_BARO
     mpu9150_i2c_baro_event(&imu_apogee.mpu, &pressure);
+    if(pressure>1){
     AbiSendMsgBARO_ABS(BARO_BOARD_SENDER_ID, pressure);
+    }
 
 // sd-log
 #if MPU9150_SLV_BARO_SDLOG

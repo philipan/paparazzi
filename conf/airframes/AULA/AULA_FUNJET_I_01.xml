@@ -25,6 +25,8 @@
     <!-- Sensors -->
     <load name="air_data.xml">
       <define name="AIR_DATA_BARO_ABS_ID"  />
+      <define name="AIR_DATA_CALC_AMSL_BARO" value="TRUE"/>
+     <!-- <configure name="air_data.calc_qnh_once" value="TRUE"/> -->
     </load>
     <load name="gps_ubx_ucenter.xml"/>
     <load name="humid_sht.xml">
@@ -36,7 +38,7 @@
       <define name="AIRSPEED_ETS_SYNC_SEND"/>
       <define name="USE_I2C2"/> 
       <configure name="AIRSPEED_ETS_I2C_DEV" value="i2c2"/>
-      <define name="AIRSPEED_ETS_SDLOG" value="TRUE"/> <!-- DOES NOT FIND sdlog.h in sim! -->
+  <!--    <define name="AIRSPEED_ETS_SDLOG" value="TRUE"/> --> <!-- DOES NOT FIND sdlog.h in sim! -->
     </load>
     <load name="temp_temod.xml">
       <configure name="TEMOD_I2C_DEV" value="i2c1"/>
@@ -78,7 +80,7 @@
     <subsystem name="telemetry" type="transparent">
       <configure name="MODEM_BAUD"  value="B57600"/>
       <configure name="MODEM_PORT"  value="UART1"/>
-      <define name="TELEMETRY_MODE_FBW" value="2"/>
+    <!--  <define name="TELEMETRY_MODE_FBW" value="2"/> -->
     </subsystem>
 
    <!-- <subsystem name="navigation" type="extra"/> -->
