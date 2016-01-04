@@ -58,6 +58,8 @@
   </modules>
 
   <firmware name="fixedwing">
+    <define name="USE_INS_NAV_INIT" value="TRUE" /> <!-- initialize ground reference with flight plan coordinates, instead of leaving it uninitialized (to be set
+from the GPS fix with NavSetGroundReferenceHere) -->
     <target name="ap" board="apogee_1.0_chibios">
       <configure name="USE_BARO_BOARD" value="FALSE"/>
       <define name="MPU9150_SLV_MAG"/>
@@ -141,7 +143,7 @@
   </section>
 
  <section name="GCS">
-   <define name="SPEECH_NAME" value="XENO 1"/>
+   <define name="SPEECH_NAME" value="Funjet 1"/>
    <define name="AC_ICON" value="flyingwing"/>
   </section>
 
@@ -184,7 +186,7 @@
     <define name="KILL_MODE_DISTANCE" value="(1.5*MAX_DIST_FROM_HOME)"/>
 
     <define name="TRIGGER_DELAY" value="1."/>
-    <define name="DEFAULT_CIRCLE_RADIUS" value="50."/>
+    <define name="DEFAULT_CIRCLE_RADIUS" value="40."/>
 
     <define name="UNLOCKED_HOME_MODE" value="TRUE"/>
   </section>
@@ -201,17 +203,22 @@
 
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.05"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.85"/>
-    <define name="AUTO_PITCH_MAX_PITCH" value="RadOfDeg(20.)"/>
-    <define name="AUTO_PITCH_MIN_PITCH" value="-RadOfDeg(20.)"/>
+    <define name="AUTO_PITCH_MAX_PITCH" value="RadOfDeg(45.)"/> <!-- was 20-->
+    <define name="AUTO_PITCH_MIN_PITCH" value="-RadOfDeg(45.)"/> <!-- was 20-->
 
     <!-- Climb loop (throttle) -->
     <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.1" unit="%/(m/s)"/>
+    <!--automatic increase to the throttle position for climb error. 
+    If you have a climb error calculated at 1 m/s, with 0.15 you will increase the throttle 
+    automatically(open loop) by 15%. -->
     <define name="AUTO_THROTTLE_PGAIN" value="0.002"/> <!-- 0.005 -->
     <define name="AUTO_THROTTLE_DGAIN" value="0.0"/> <!-- 0.005 -->
     <define name="AUTO_THROTTLE_IGAIN" value="0.004"/> <!-- 0.005 -->
 
     <!-- Climb loop (pitch) -->
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.03"/>
+    <!-- increases the pitch setpoint for a climb_error. 
+    If your climb rate error is 1 m/s you will command a pitch of 0.35 radians. -->
     <define name="AUTO_PITCH_PGAIN" value="0.04"/> <!-- 0.03 -->
     <define name="AUTO_PITCH_DGAIN" value="0.04"/> <!-- 0.03 -->
     <define name="AUTO_PITCH_IGAIN" value="0.0"/>
