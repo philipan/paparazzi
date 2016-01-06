@@ -308,7 +308,6 @@ void humid_sht_init(void)
   humid_sht_available = FALSE;
   humid_sht_status = SHT_IDLE;
 
-// sd-log
 #if SHT_SDLOG
   log_sht_started = FALSE;
 #endif
@@ -353,7 +352,6 @@ void humid_sht_periodic(void)
       DOWNLINK_SEND_SHT_STATUS(DefaultChannel, DefaultDevice, &humidsht, &tempsht, &fhumidsht, &ftempsht);
       humid_sht_available = FALSE;
 
-// sd-log
 #if SHT_SDLOG
   if (pprzLogFile != -1) {
     if (!log_sht_started) {

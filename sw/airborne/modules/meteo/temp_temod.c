@@ -59,7 +59,6 @@ void temod_init(void)
 {
   tmd_trans.status = I2CTransDone;
 
-// sd-log
 #if TEMP_TEMOD_SDLOG
   log_temod_started = FALSE;
 #endif
