@@ -33,25 +33,11 @@
 #include "std.h"
 #include "generated/airframe.h"
 #include "subsystems/imu.h"
-
-#include "peripherals/mpu60x0_i2c.h"
-
-#ifdef MPU9150_SLV_MAG
-#include "peripherals/mpu9150_i2c.h"
+#if APOGEE_USE_MPU9150
 #include "peripherals/ak8975.h"
 #endif
 
-#ifdef MPU9150_SLV_BARO
-#include "peripherals/mpl3115.h"
-#include "subsystems/abi.h"
-#endif
-
-// sd-log
-#if MPU9150_SLV_BARO_SDLOG
-#include "sdLog.h"
-#include "subsystems/chibios-libopencm3/chibios_sdlog.h"
-#include "subsystems/gps.h"
-#endif
+#include "peripherals/mpu60x0_i2c.h"
 
 // Default configuration
 #if !defined IMU_GYRO_P_SIGN & !defined IMU_GYRO_Q_SIGN & !defined IMU_GYRO_R_SIGN
@@ -112,11 +98,9 @@
 #endif
 
 struct ImuApogee {
-  volatile bool_t gyr_valid;
-  volatile bool_t acc_valid;
   struct Mpu60x0_I2c mpu;
-#ifdef MPU9150_SLV_MAG
-  volatile bool_t mag_valid;
+#if APOGEE_USE_MPU9150
+  struct Ak8975 ak;
 #endif
 };
 

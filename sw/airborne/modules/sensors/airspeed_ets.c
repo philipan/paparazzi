@@ -236,7 +236,7 @@ void airspeed_ets_read_event(void)
 #if AIRSPEED_ETS_SDLOG
   if (pprzLogFile != -1) {
     if (!log_airspeed_ets_started) {
-      sdLogWriteLog(pprzLogFile, "AIRSPEED_ETS: airspeed(m/s) GPS_fix TOW(ms) Week Lat(1e7rad) Lon(1e7rad) HMSL(mm) gpseed(cm/s) course(1e7rad) climb(cm/s)\n");
+      sdLogWriteLog(pprzLogFile, "AIRSPEED_ETS: raw offset airspeed(m/s) GPS_fix TOW(ms) Week Lat(1e7rad) Lon(1e7rad) HMSL(mm) gpseed(cm/s) course(1e7rad) climb(cm/s)\n");
       log_airspeed_ets_started = TRUE;
     }
     sdLogWriteLog(pprzLogFile, "airspeed_ets: %d %d %8.4f   %d %d %d   %d %d %d   %d %d %d\n",
