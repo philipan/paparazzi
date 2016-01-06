@@ -28,7 +28,7 @@
     </block>
 
     <block name="Geo init">
-      <while cond="LessThan(NavBlockTime(), )"/>
+      <while cond="LessThan(NavBlockTime(), 7)"/>
       <!-- <call fun="NavSetGroundReferenceHere()"/> -->
       <call fun="NavSetAltitudeReferenceHere()"/>
       <set var="air_data.calc_qnh_once" value="TRUE"/>
