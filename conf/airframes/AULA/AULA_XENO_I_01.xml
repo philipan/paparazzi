@@ -35,7 +35,7 @@
     <load name="airspeed_ets.xml">
       <define name="AIRSPEED_ETS_SYNC_SEND"/>
       <define name="USE_I2C2"/> 
-      <configure name="AIRSPEED_ETS_I2C_DEV" value="i2c2"/>
+      <define name="AIRSPEED_ETS_I2C_DEV" value="i2c2"/>
       <define name="AIRSPEED_ETS_SDLOG" value="TRUE"/> <!-- DOES NOT FIND sdlog.h in sim! -->
     </load>
     <load name="temp_temod.xml">
@@ -57,12 +57,9 @@
 
   <firmware name="fixedwing">
     <target name="ap" board="apogee_1.0_chibios">
-      <configure name="USE_BARO_BOARD" value="FALSE"/>
-      <define name="MPU9150_SLV_MAG"/>
-      <define name="MPU9150_SLV_BARO"/>
-      <define name="MPU9150_SLV_BARO_SDLOG" value="TRUE" />
       <subsystem name="radio_control" type="ppm"/>
       <configure name="PERIODIC_FREQUENCY" value="100"/>
+      <define name="APOGEE_BARO_SDLOG" value="TRUE"/>
     </target>
     <target name="sim" board="pc">
       <subsystem name="radio_control" type="ppm"/>
@@ -86,7 +83,7 @@
     <subsystem name="sdlog"/>
 
     <!-- Actuators are automatically chosen according to board-->
-    <subsystem name="imu"     type="apogee"/>
+    <subsystem name="imu"     type="apogee_mpu9150"/>
     <subsystem name="ahrs"    type="float_dcm"/>
 
     <subsystem name="ins"     type="alt_float">
