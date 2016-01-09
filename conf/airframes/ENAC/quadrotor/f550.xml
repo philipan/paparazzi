@@ -6,8 +6,14 @@
       <define name="MAG_HMC58XX_I2C_DEV" value="i2c2"/>
     </load>
   </modules-->
+
+
   <modules>
     <load name="gps_ubx_ucenter.xml"/>
+
+   <load name="air_data.xml">
+   <define name="AIR_DATA_BARO_ABS_ID"  />
+   </load>
   </modules>
 
   <firmware name="rotorcraft">
