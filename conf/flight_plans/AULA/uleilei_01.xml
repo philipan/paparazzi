@@ -1,0 +1,116 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+<!-- 
+<flight_plan alt="360" ground_alt="289" lat0="49.950038" lon0="9.654804" max_dist_from_home="500" name="Steinfeld_" security_height="50">
+-->
+<!--
+<flight_plan alt="330" ground_alt="269" lat0="49.953363" lon0="9.667030" max_dist_from_home="500" name="Steinfeld_Hof_" security_height="50">
+-->
+<!--
+<flight_plan alt="330" ground_alt="269" lat0="49.953224" lon0="9.667124" max_dist_from_home="500" name="Steinfeld_Whg_" security_height="50">
+-->
+<!--
+<flight_plan alt="450" ground_alt="381" lat0="49.826844" lon0="11.194715" max_dist_from_home="500" name="Uleilei_" security_height="50">
+-->
+<!--
+<flight_plan alt="650" ground_alt="600" lat0="47.830809" lon0="11.061623" max_dist_from_home="500" name="fendt_" security_height="30">
+-->
+<flight_plan alt="500" ground_alt="443" lat0="49.840644" lon0="11.219133" max_dist_from_home="500" name="Buch_" security_height="50">
+
+
+<header>
+#include "subsystems/datalink/datalink.h"
+</header>
+
+  <waypoints>
+    <waypoint name="HOME" x="0" y="0" height="50"/>
+    <waypoint name="Profil" x="0" y="0" height="0"/>
+    <waypoint name="Anflug" x="-150" y="0" height="20"/>
+
+    <waypoint name="AF" height="30.0" x="150" y="0"/>
+    <waypoint name="TD" alt="0.0" x="50" y="0"/>
+    <waypoint name="_BASELEG" x="150" y="0"/>
+
+  </waypoints>
+  
+  <blocks>
+
+    <block name="Waiting for GPS fix">
+      <!-- <set value="1" var="kill_throttle"/> -->
+      <while cond="!GpsFixValid()"/>
+    </block>
+
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 7)"/>
+      <!-- <call fun="NavSetGroundReferenceHere()"/> -->
+      <call fun="NavSetAltitudeReferenceHere()"/>
+      <!-- <set var="air_data.calc_qnh_once" value="TRUE"/> -->
+    </block>
+
+    <block name="Waiting for Remote Control">
+      <while cond="RCLost()"/> 
+    </block>
+
+    <block name="Unlock throttle">
+      <set value="1" var="launch"/>
+      <set value="0" var="kill_throttle"/>
+      <set value="0" var="autopilot_flight_time"/>
+    </block>
+
+    <block name="Climb">
+      <circle wp="Profil" climb="5" radius="-70" throttle="0.80" until="GetPosAlt() > ground_alt + 305" vmode="climb"/>
+      <deroute block="Descent"/>
+    </block>
+
+    <block name="Climb_pitch">
+      <circle wp="Profil" pitch="45" radius="-70" throttle="0.80" until="GetPosAlt() > ground_alt + 305" vmode="throttle"/>
+      <deroute block="Descent"/>
+    </block>
+
+    <block name="Descent">
+      <circle wp="Profil" climb="-3" radius="-70" throttle="0.40" pitch="auto" until="ground_alt+25 > GetPosAlt()" vmode="climb"/>
+      <exception cond="GetPosAlt() > ground_alt + 305 + 50 " deroute="Down"/>
+      <!-- <deroute block="Landing"/> -->
+      <deroute block="Climb"/>
+    </block>
+
+    <block name="Down">
+     <circle wp="Profil" radius="-70" until="ground_alt+35 > GetPosAlt()" vmode="alt" alt="ground_alt+40"/>
+      <deroute block="Landing"/>
+    </block>
+
+    <block name="Landing">
+      <while cond="TRUE">
+      <go wp="Anflug" approaching_time="1"/>
+      <go from="Anflug" hmode="route" vmode="glide" wp="HOME" alt="ground_alt+15" approaching_time="1"/>
+      </while>
+      <deroute block="Standby"/>
+    </block>
+
+    <block name="Standby" group="home" key="Ctrl+a" strip_button="Standby" strip_icon="home.png">
+      <circle radius="-70" wp="HOME"/>
+    </block>
+
+    <block name="Land Right AF-TD" strip_button="Land right (wp AF-TD)" strip_icon="land-right.png" group="land">
+      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="Land Left AF-TD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png" group="land">
+      <set value="-DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="land">
+      <call fun="nav_compute_baseleg(WP_AF, WP_TD, WP__BASELEG, nav_radius)"/>
+      <circle radius="nav_radius" until="NavCircleCount() > 0.5" wp="_BASELEG"/>
+      <circle radius="nav_radius" until="And(NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-(nav_radius/fabs(nav_radius))*10), 10 > fabs(GetPosAlt() - WaypointAlt(WP__BASELEG)))" wp="_BASELEG"/>
+    </block>
+    <block name="final">
+      <exception cond="GetAltRef() + 10 > GetPosAlt()" deroute="flare"/>
+      <go from="AF" hmode="route" vmode="glide" wp="TD"/>
+    </block>
+    <block name="flare">
+      <go approaching_time="0" from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="TD"/>
+      <attitude roll="0.0" throttle="0.0" until="FALSE" vmode="throttle"/>
+    </block>
+ 
+  </blocks>
+</flight_plan>

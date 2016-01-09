@@ -1,108 +1,146 @@
 /*
- * Copyright (C) 2013 TU Delft Quatrotor Team 1
- *
- * This file is part of Paparazzi.
- *
- * Paparazzi is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- *
- * Paparazzi is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Paparazzi; see the file COPYING.  If not, write to
- * the Free Software Foundation, 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- */
+* Copyright (C) 2013 Gautier Hattenberger (ENAC)
+*
+* This file is part of paparazzi.
+*
+* paparazzi is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2, or (at your option)
+* any later version.
+*
+* paparazzi is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with paparazzi; see the file COPYING.  If not, write to
+* the Free Software Foundation, 59 Temple Place - Suite 330,
+* Boston, MA 02111-1307, USA.
+*
+*/
 
 /**
- * @file boards/ardrone/baro_board.c
- * Paparazzi AR Drone 2 Baro Sensor implementation:.
+ * @file boards/apogee/baro_board.c
  *
- * Based on BMP180 implementation by C. de Wagter.
+ * integrated barometer for Apogee boards (mpl3115)
  */
 
+#include "std.h"
 #include "subsystems/sensors/baro.h"
-#include "subsystems/abi.h"
-#include "baro_board.h"
-#include "navdata.h"
+#include "peripherals/mpl3115.h"
 
-/** Use an extra median filter to filter baro data
- */
-#if USE_BARO_MEDIAN_FILTER
-#include "filters/median_filter.h"
-struct MedianFilterInt baro_median;
+// to get MPU status
+#include "boards/apogee/imu_apogee.h"
+
+#include "subsystems/abi.h"
+#include "led.h"
+
+// sd-log
+#if APOGEE_BARO_SDLOG
+#include "sdLog.h"
+#include "subsystems/chibios-libopencm3/chibios_sdlog.h"
+#include "subsystems/gps.h"
+bool_t log_apogee_baro_started;
+int count_sd_writes;
 #endif
 
 
-#define BMP180_OSS 0  // Parrot ARDrone uses no oversampling
+/** Normal frequency with the default settings
+ *
+ * the baro read function should be called at 5 Hz
+ */
+#ifndef BARO_BOARD_APOGEE_FREQ
+#define BARO_BOARD_APOGEE_FREQ 5
+#endif
+
+/** Baro periodic prescaler
+ *
+ * different for fixedwing and rotorcraft...
+ */
+#ifdef BARO_PERIODIC_FREQUENCY
+#define MPL_PRESCALER ((BARO_PERIODIC_FREQUENCY)/BARO_BOARD_APOGEE_FREQ)
+#else
+#ifdef PERIODIC_FREQUENCY
+#define MPL_PRESCALER ((PERIODIC_FREQUENCY)/BARO_BOARD_APOGEE_FREQ)
+#else
+// default: assuming 60Hz for a 5Hz baro update
+#define MPL_PRESCALER 12
+#endif
+#endif
+
+/** Counter to init ads1114 at startup */
+#define BARO_STARTUP_COUNTER (200/(MPL_PRESCALER))
+uint16_t startup_cnt;
+
+struct Mpl3115 apogee_baro;
 
 void baro_init(void)
 {
-#if USE_BARO_MEDIAN_FILTER
-  init_median_filter(&baro_median);
+  mpl3115_init(&apogee_baro, &i2c1, MPL3115_I2C_ADDR);
+#ifdef BARO_LED
+  LED_OFF(BARO_LED);
 #endif
-}
+  startup_cnt = BARO_STARTUP_COUNTER;
 
-void baro_periodic(void) {}
-
-/**
- * Apply temperature and sensor calibration to get pressure in Pa.
- * @param raw uncompensated raw pressure reading
- * @return compensated pressure in Pascal
- */
-static inline int32_t baro_apply_calibration(int32_t raw)
-{
-  int32_t b6 = ((int32_t)navdata.bmp180_calib.b5) - 4000L;
-  int32_t x1 = (((int32_t)navdata.bmp180_calib.b2) * (b6 * b6 >> 12)) >> 11;
-  int32_t x2 = ((int32_t)navdata.bmp180_calib.ac2) * b6 >> 11;
-  int32_t x3 = x1 + x2;
-  int32_t b3 = (((((int32_t)navdata.bmp180_calib.ac1) * 4 + x3) << BMP180_OSS) + 2) / 4;
-  x1 = ((int32_t)navdata.bmp180_calib.ac3) * b6 >> 13;
-  x2 = (((int32_t)navdata.bmp180_calib.b1) * (b6 * b6 >> 12)) >> 16;
-  x3 = ((x1 + x2) + 2) >> 2;
-  uint32_t b4 = (((int32_t)navdata.bmp180_calib.ac4) * (uint32_t)(x3 + 32768L)) >> 15;
-  uint32_t b7 = (raw - b3) * (50000L >> BMP180_OSS);
-  int32_t p = b7 < 0x80000000L ? (b7 * 2) / b4 : (b7 / b4) * 2;
-  x1 = (p >> 8) * (p >> 8);
-  x1 = (x1 * 3038UL) >> 16;
-  x2 = (-7357L * p) >> 16;
-  int32_t press = p + ((x1 + x2 + 3791L) >> 4);
-  // Zero at sealevel
-  return press;
-}
-
-/**
- * Apply temperature calibration.
- * @param tmp_raw uncompensated raw temperature reading
- * @return compensated temperature in 0.1 deg Celcius
- */
-static inline int32_t baro_apply_calibration_temp(int32_t tmp_raw)
-{
-  int32_t x1 = ((tmp_raw - ((int32_t)navdata.bmp180_calib.ac6)) * ((int32_t)navdata.bmp180_calib.ac5)) >> 15;
-  int32_t x2 = (((int32_t)navdata.bmp180_calib.mc) << 11) / (x1 + ((int32_t)navdata.bmp180_calib.md));
-  navdata.bmp180_calib.b5 = x1 + x2;
-  return (navdata.bmp180_calib.b5 + 8) >> 4;
-}
-
-void ardrone_baro_event(void)
-{
-  if (navdata.baro_available) {
-    if (navdata.baro_calibrated) {
-      // first read temperature because pressure calibration depends on temperature
-      float temp_deg = 0.1 * baro_apply_calibration_temp(navdata.measure.temperature_pressure);
-      AbiSendMsgTEMPERATURE(BARO_BOARD_SENDER_ID, temp_deg);
-      int32_t press_pascal = baro_apply_calibration(navdata.measure.pressure);
-#if USE_BARO_MEDIAN_FILTER
-      press_pascal = update_median_filter(&baro_median, press_pascal);
+#if APOGEE_BARO_SDLOG
+  log_apogee_baro_started = FALSE;
+  count_sd_writes=0;
 #endif
-      float pressure = (float)press_pascal;
-      AbiSendMsgBARO_ABS(BARO_BOARD_SENDER_ID, pressure);
+
+}
+
+void baro_periodic(void)
+{
+
+  // Baro is slave of the MPU, only start reading it after MPU is configured
+  if (imu_apogee.mpu.config.initialized) {
+
+    if (startup_cnt > 0 && apogee_baro.data_available) {
+      // Run some loops to get correct readings from the adc
+      --startup_cnt;
+      apogee_baro.data_available = FALSE;
+#ifdef BARO_LED
+      LED_TOGGLE(BARO_LED);
+      if (startup_cnt == 0) {
+        LED_ON(BARO_LED);
+      }
+#endif
     }
-    navdata.baro_available = FALSE;
+    // Read the sensor
+    RunOnceEvery(MPL_PRESCALER, mpl3115_periodic(&apogee_baro));
   }
 }
+
+void apogee_baro_event(void)
+{
+  mpl3115_event(&apogee_baro);
+  if (apogee_baro.data_available && startup_cnt == 0) {
+    float pressure = ((float)apogee_baro.pressure / (1 << 2));
+    AbiSendMsgBARO_ABS(BARO_BOARD_SENDER_ID, pressure);
+    float temp = apogee_baro.temperature / 16.0f;
+    AbiSendMsgTEMPERATURE(BARO_BOARD_SENDER_ID, temp);
+    apogee_baro.data_available = FALSE;
+
+#if APOGEE_BARO_SDLOG
+  if (pprzLogFile != -1) {
+    if (!log_apogee_baro_started) {
+      sdLogWriteLog(pprzLogFile, "APOGEE_BARO: Pres(Pa) Temp/degC) GPS_fix TOW(ms) Week Lat(1e7deg) Lon(1e7deg) HMSL(mm) gpseed(cm/s) course(1e7deg) climb(cm/s)\n");
+      log_apogee_baro_started = TRUE;
+    }
+    if (count_sd_writes == 0) {
+    sdLogWriteLog(pprzLogFile, "apogee_baro: %9.4f %9.4f %d %d %d   %d %d %d   %d %d %d\n",
+		  pressure,temp,
+		  gps.fix, gps.tow, gps.week,
+		  gps.lla_pos.lat, gps.lla_pos.lon, gps.hmsl,
+		  gps.gspeed, gps.course, -gps.ned_vel.z);
+    }
+    count_sd_writes++;
+    if (count_sd_writes > 8) {count_sd_writes=0;}
+  }
+#endif
+
+
+  }
+}
+
