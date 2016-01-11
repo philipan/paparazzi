@@ -16,6 +16,7 @@
     <load name="flight_recorder.xml"/>
     <load name="air_data.xml">
       <define name="AIR_DATA_BARO_ABS_ID"  />
+      <define name="AIR_DATA_CALC_AMSL_BARO" value="TRUE"/>
     </load>
     <load name="gps_ubx_ucenter.xml"/>
     <load name="humid_sht.xml">
@@ -26,8 +27,8 @@
     <load name="airspeed_ets.xml">
       <define name="AIRSPEED_ETS_SYNC_SEND"/>
       <define name="USE_I2C2"/> 
-      <configure name="AIRSPEED_ETS_I2C_DEV" value="i2c2"/>
-      <define name="AIRSPEED_ETS_SDLOG" value="TRUE"/> 
+      <define name="AIRSPEED_ETS_I2C_DEV" value="i2c2"/>
+      <define name="AIRSPEED_ETS_SDLOG" value="TRUE"/>
     </load>
     <load name="temp_temod.xml">
       <configure name="TEMOD_I2C_DEV" value="i2c1"/>
@@ -48,49 +49,42 @@
   </modules>
 
   <firmware name="fixedwing">
+    <define name="USE_INS_NAV_INIT" value="TRUE" /> <!-- initialize ground reference with flight plan coordinates, instead of leaving it uninitialized (to be set
+from the GPS fix with NavSetGroundReferenceHere) -->
     <target name="ap" board="apogee_1.0_chibios">
-<!-- UNIA START -->
-      <configure name="USE_BARO_BOARD" value="FALSE"/>
-      <define name="MPU9150_SLV_MAG"/>
-      <define name="MPU9150_SLV_BARO"/>
-      <define name="MPU9150_SLV_BARO_SDLOG" value="TRUE" />
       <subsystem name="radio_control" type="ppm"/>
 <!-- UNIA END -->
       <configure name="PERIODIC_FREQUENCY" value="100"/>
+      <define name="APOGEE_BARO_SDLOG" value="TRUE"/>
     </target>
     <target name="sim" board="pc">
       <subsystem name="radio_control" type="ppm"/>
     </target>
 
-<!-- UNIA START -->
-   <!--  <define name="USE_I2C1"/>-->
    <define name="USE_I2C1"/>
    <define name="USE_I2C2"/>
-<!-- UNIA END -->
     <!--define name="AGR_CLIMB"/-->
     <!--define name="LOITER_TRIM"/-->
     <!--define name="PITCH_TRIM"/-->
 
     <!-- Communication -->
-<!-- UNIA START -->
     <subsystem name="telemetry" type="transparent">
-      <configure name="MODEM_BAUD"  value="B19200"/>
       <configure name="MODEM_BAUD"  value="B57600"/>
       <configure name="MODEM_PORT"  value="UART1"/>
-      <define name="TELEMETRY_MODE_FBW" value="2"/>
+    <!--  <define name="TELEMETRY_MODE_FBW" value="2"/> -->
     </subsystem>
-<!-- UNIA END -->
 
    <!-- <subsystem name="navigation" type="extra"/> -->
 
     <subsystem name="sdlog"/>
 
     <!-- Actuators are automatically chosen according to board-->
-    <subsystem name="imu"     type="apogee"/>
+    <subsystem name="imu"     type="apogee_mpu9150"/> 
+  <!--  <subsystem name="imu"     type="apogee"/> -->
     <subsystem name="ahrs"    type="float_dcm"/>
 
     <subsystem name="ins"     type="alt_float">
-<!--      <define name="USE_BAROMETER" value="TRUE"/> -->
+    <!--  <define name="USE_BAROMETER" value="TRUE"/> -->
     </subsystem>
 
     <subsystem name="control"/>
@@ -223,8 +217,8 @@
 
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.05"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.85"/>
-    <define name="AUTO_PITCH_MAX_PITCH" value="RadOfDeg(20.)"/>
-    <define name="AUTO_PITCH_MIN_PITCH" value="-RadOfDeg(20.)"/>
+    <define name="AUTO_PITCH_MAX_PITCH" value="RadOfDeg(80.)"/>
+    <define name="AUTO_PITCH_MIN_PITCH" value="-RadOfDeg(45.)"/>
 
     <!-- Climb loop (throttle) -->
     <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.1" unit="%/(m/s)"/>
@@ -309,7 +303,7 @@
     <define name="DEFAULT_THROTTLE" value="0.3" unit="%"/>
     <define name="DEFAULT_ROLL" value="0.3" unit="rad"/>
     <define name="DEFAULT_PITCH" value="0.5" unit="rad"/>
-    <define name="HOME_RADIUS" value="100" unit="m"/>
+    <define name="HOME_RADIUS" value="70" unit="m"/>
   </section>
 
   <section name="SIMU">
