@@ -1,0 +1,74 @@
+<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+<flight_plan alt="650" ground_alt="500" lat0="48.33043" lon0="10.89276" max_dist_from_home="800" name="ScaleX_" security_height="30">
+<header>
+#include "subsystems/datalink/datalink.h"
+</header>
+
+  <waypoints>
+    <waypoint name="HOME" lon="10.89276" lat="	48.33043" height="40"/>
+    <waypoint name="Profil" lon="10.89212" lat="48.33022"/>
+    <waypoint name="Anflug" x="-100" y="0" height="30"/>
+
+    <waypoint name="Eins" lon="10.89136" lat="48.32843"/> <!--623m-->
+    <waypoint name="Zwei" lon="10.89087" lat="48.33049"/>
+    <waypoint name="Drei" lon="10.89183" lat="48.33241"/>
+    <waypoint name="Vier" lon="10.89085" lat="48.33243"/> <!--616m-->
+    <waypoint name="Fünf" lon="10.89022" lat="48.33072"/>
+    <waypoint name="Sechs" lon="10.88937" lat="	48.32876"/>
+    <waypoint name="Sieben" lon="10.88847" lat="48.32988"/>
+    <waypoint name="Acht" lon="10.88921" lat="48.33196"/> <!--616m-->
+    <waypoint name="Neun" lon="10.88756" lat="48.32953"/>
+
+  </waypoints>
+  <blocks>
+
+    <block name="Waiting for GPS fix">
+      <set value="1" var="kill_throttle"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+
+    <block name="Waiting for Remote Control">
+      <while cond="RCLost()"/> 
+    </block>
+
+    <block name="Unlock throttle">
+      <set value="1" var="launch"/>
+      <set value="0" var="kill_throttle"/>
+      <set value="0" var="autopilot_flight_time"/>
+    </block>
+
+    <block name="Climb">
+      <circle wp="Profil" pitch="25" radius="-90" throttle="1.00" until="GetPosAlt() > ground_alt+0100" vmode="throttle"/>
+      <deroute block="Descent"/>
+    </block>
+
+    <block name="Descent">
+      <circle wp="Profil" climb="-2.0" radius="-70" throttle="0.30" pitch="auto" until="ground_alt+0035 > GetPosAlt()" vmode="climb"/>
+      <exception cond="GetPosAlt() > ground_alt + 0300 + 50 " deroute="Down"/>
+      <deroute block="Landing"/>
+    </block>
+
+    <block name="Down">
+     <circle wp="Profil" radius="-70" until="ground_alt+35 > GetPosAlt()" vmode="alt" alt="ground_alt+40"/>
+      <deroute block="Landing"/>
+    </block>
+
+    <block name="Landing">
+      <while cond="TRUE">
+      <go wp="Anflug" approaching_time="1"/>
+      <go from="Anflug" hmode="route" vmode="glide" wp="HOME" alt="ground_alt+15" approaching_time="1"/>
+      </while>
+      <deroute block="Standby"/>
+    </block>
+
+    <block name="Standby" group="home" key="Ctrl+a" strip_button="Standby" strip_icon="home.png">
+      <circle radius="-70" wp="HOME"/>
+    </block>
+ 
+  </blocks>
+</flight_plan>
