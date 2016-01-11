@@ -13,7 +13,7 @@
     <waypoint name="Zwei" lon="10.89087" lat="48.33049"/>
     <waypoint name="Drei" lon="10.89183" lat="48.33241"/>
     <waypoint name="Vier" lon="10.89085" lat="48.33243"/> <!--616m-->
-    <waypoint name="Fünf" lon="10.89022" lat="48.33072"/>
+    <waypoint name="Fuenf" lon="10.89022" lat="48.33072"/>
     <waypoint name="Sechs" lon="10.88937" lat="	48.32876"/>
     <waypoint name="Sieben" lon="10.88847" lat="48.32988"/>
     <waypoint name="Acht" lon="10.88921" lat="48.33196"/> <!--616m-->
@@ -43,14 +43,13 @@
     </block>
 
     <block name="Climb">
-      <circle wp="Profil" pitch="25" radius="-90" throttle="1.00" until="GetPosAlt() > ground_alt+0100" vmode="throttle"/>
-      <deroute block="Descent"/>
+      <circle wp="Profil" pitch="70" radius="-60" throttle="0.80" until="GetPosAlt() > ground_alt+0100" vmode="throttle"/>
+      <deroute block="wegpunkte"/>
     </block>
 
-    <block name="Descent">
-      <circle wp="Profil" climb="-2.0" radius="-70" throttle="0.30" pitch="auto" until="ground_alt+0035 > GetPosAlt()" vmode="climb"/>
-      <exception cond="GetPosAlt() > ground_alt + 0300 + 50 " deroute="Down"/>
-      <deroute block="Landing"/>
+    <block name="wegpunkte">
+    <go wp="Eins"/>
+    <path wpts="Eins, Zwei, Drei, Vier, Fuenf, Sechs, Sieben, Acht, Neun" approaching_time="1" pitch="auto" throttle="0.5"/>      <deroute block="Landing"/>
     </block>
 
     <block name="Down">
