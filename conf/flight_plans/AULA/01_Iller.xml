@@ -1,0 +1,69 @@
+<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+
+<flight_plan alt="685" ground_alt="635" lat0="47.82197" lon0="10.22318" max_dist_from_home="500" name="Iller_Altusried" qfu="180" security_height="25">
+  <header>
+#include "subsystems/datalink/datalink.h"
+</header>
+  <waypoints>
+    <waypoint lat="47.82197" lon="10.22318" name="HOME"/>
+    <waypoint lat="47.82185" lon="10.22325" name="STDBY"/>
+    <waypoint lat="47.82066" lon="10.22390" name="Aufstieg"/>
+    <waypoint lat="47.81980" lon="10.22490" name="Anflug1"/>
+    <waypoint lat="47.81900" lon="10.22560" name="Anflug2"/>
+    <waypoint lat="47.81910" lon="10.22435" name="Punkt1"/>
+    <waypoint lat="47.82015" lon="10.22270" name="Punkt2"/>
+    <waypoint lat="47.82102" lon="10.22225" name="Punkt3"/>
+    <waypoint lat="47.82222" lon="10.22210" name="Punkt4"/>
+    <waypoint lat="47.82380" lon="10.22175" name="Punkt5"/>
+    <waypoint height="ground_alt+0020" lat="47.82260" lon="10.22295" name="Abstieg1"/>
+    <waypoint height="ground_alt+0000" lat="47.82120" lon="10.22355" name="Abstieg2"/>
+  </waypoints>
+  <blocks>
+
+    <block name="Waiting for GPS fix">
+      <set value="1" var="kill_throttle"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 7)"/>
+      <!-- <call fun="NavSetGroundReferenceHere()"/> -->
+      <call fun="NavSetAltitudeReferenceHere()"/>
+      <!-- <set var="air_data.calc_qnh_once" value="TRUE"/> -->
+    </block>
+
+    <block name="Waiting for Remote Control">
+      <while cond="RCLost()"/>
+    </block>
+
+    <block name="Unlock throttle">
+      <set value="1" var="launch"/>
+      <set value="0" var="kill_throttle"/>
+      <set value="0" var="autopilot_flight_time"/>
+      <go from="HOME" pitch="45" throttle="0.60" until="GetPosAlt() > ground_alt+0050" vmode="throttle" wp="Aufstieg"/>
+    </block>
+
+    <block name="Anflug">
+      <exception cond="10 > PowerVoltage()" deroute="Standby"/>
+      <go from="Aufstieg" approaching_time="0" throttle="0.20" hmode="route" wp="Anflug1"/>
+      <go wp="Anflug2"/>
+    </block>
+
+    <block name="Aufnahme">
+      <exception cond="10 > PowerVoltage()" deroute="Standby"/>
+      <exception cond="(ground_alt+0030 > GetPosAlt())" deroute="Standby"/>
+      <path wpts="Punkt1, Punkt2, Punkt3, Punkt4, Punkt5" approaching_time="0" throttle="0.10"/>
+    </block>
+
+    <block name="Landung">
+      <while cond="TRUE">
+        <go wp="Abstieg1" approaching_time="0.5"/>
+        <go from="Abstieg1" hmode="route" vmode="throttle" wp="Abstieg2" alt="ground_alt+0050" approaching_time="1" throttle="0.10"/>
+      </while>
+    </block>
+
+    <block name="Standby">
+      <circle radius="50" wp="STDBY" alt="ground_alt+0100"/>
+    </block>
+  </blocks>
+</flight_plan>
