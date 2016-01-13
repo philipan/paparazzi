@@ -20,6 +20,7 @@
     <block name="Geo init">
       <while cond="LessThan(NavBlockTime(), 10)"/>
       <!-- <call fun="NavSetGroundReferenceHere()"/> -->
+      <call fun="NavSetAltitudeReferenceHere()"/>
     </block>
 
     <block name="Waiting for Remote Control">
