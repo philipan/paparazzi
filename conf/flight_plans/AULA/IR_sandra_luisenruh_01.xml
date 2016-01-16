@@ -1,0 +1,69 @@
+<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+<flight_plan alt="650" ground_alt="500" lat0="48.30844" lon0="10.91995" max_dist_from_home="800" name="ScaleX_" security_height="30">
+<header>
+#include "subsystems/datalink/datalink.h"
+</header>
+
+  <waypoints>
+    <waypoint name="HOME" lon="10.91995" lat="	48.30844" height="40"/>
+    <waypoint name="Profil" lon="10.91995" lat="48.30844"/>
+    <waypoint name="Anflug" x="0" y="0" height="30"/>
+
+    <waypoint name="Eins" lon="10.91993" lat="48.30984"/> <!--623m-->
+    <waypoint name="Zwei" lon="10.92166" lat="48.30984"/>
+    <waypoint name="Drei" lon="10.92298" lat="48.30710"/>
+    <waypoint name="Vier" lon="10.92291" lat="48.30547"/> <!--616m-->
+ 
+
+  </waypoints>
+  <blocks>
+
+    <block name="Waiting for GPS fix">
+      <set value="1" var="kill_throttle"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+
+    <block name="Waiting for Remote Control">
+      <while cond="RCLost()"/> 
+    </block>
+
+    <block name="Unlock throttle">
+      <set value="1" var="launch"/>
+      <set value="0" var="kill_throttle"/>
+      <set value="0" var="autopilot_flight_time"/>
+    </block>
+
+    <block name="Climb">
+      <circle wp="Profil" pitch="70" radius="-60" throttle="0.80" until="GetPosAlt() > ground_alt+0100" vmode="throttle"/>
+      <deroute block="wegpunkte"/>
+    </block>
+
+    <block name="wegpunkte">
+    <go wp="Eins"/>
+    <path wpts="Eins, Zwei, Drei, Vier" approaching_time="1" pitch="auto" throttle="0.5"/>      <deroute block="Landing"/>
+    </block>
+
+    <block name="Down">
+     <circle wp="Profil" radius="-70" until="ground_alt+35 > GetPosAlt()" vmode="alt" alt="ground_alt+40"/>
+      <deroute block="Landing"/>
+    </block>
+
+    <block name="Landing">
+      <while cond="TRUE">
+      <go wp="Anflug" approaching_time="1"/>
+      <go from="Anflug" hmode="route" vmode="glide" wp="HOME" alt="ground_alt+15" approaching_time="1"/>
+      </while>
+      <deroute block="Standby"/>
+    </block>
+
+    <block name="Standby" group="home" key="Ctrl+a" strip_button="Standby" strip_icon="home.png">
+      <circle radius="-70" wp="HOME"/>
+    </block>
+ 
+  </blocks>
+</flight_plan>

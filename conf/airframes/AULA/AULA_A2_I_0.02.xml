@@ -84,7 +84,7 @@ from the GPS fix with NavSetGroundReferenceHere) -->
     <subsystem name="ahrs"    type="float_dcm"/>
 
     <subsystem name="ins"     type="alt_float">
-    <!--  <define name="USE_BAROMETER" value="TRUE"/> -->
+      <define name="USE_BAROMETER" value="TRUE"/>
     </subsystem>
 
     <subsystem name="control"/>
