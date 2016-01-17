@@ -1,0 +1,96 @@
+<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+<flight_plan name="Wertach" alt="570" ground_alt="500" lat0="48.3158615" lon0="10.848747" max_dist_from_home="500" security_height="30" >
+	
+<header>
+#include "subsystems/datalink/datalink.h"
+</header>
+
+  <waypoints>
+    <waypoint name="HOME" lon="10.849293" lat="48.316985" />
+  
+
+   <!-- BITTE NUR PROFIL UND ANFLUG AENDERN (PROFIL-KOORD. VON UNTEN RAUSKOPIEREN) -->
+   <!-- <waypoint name="Profil" lon="11.0608894" lat="47.8321416" height="60"/> -->
+
+    <waypoint name="Anflug" x="-27.0" y="-114.0" height="20"/>
+	<waypoint name="Touchdown" x="-59.0" y="-193.0" height="1"/>
+    <waypoint name="Northeast" x="65.0" y="260.0"/>
+    <waypoint name="Southwest"  x="-130.0" y="-146.0"/>
+   
+ 
+
+  </waypoints>
+  <blocks>
+
+    <block name="Waiting for GPS fix">
+      <!-- <set value="1" var="kill_throttle"/> -->
+      <while cond="!GpsFixValid()"/>
+    </block>
+
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <!-- <call fun="NavSetGroundReferenceHere()"/> -->
+    </block>
+
+    <block name="Waiting for Remote Control">
+      <while cond="RCLost()"/> 
+    </block>
+
+    <block name="Unlock throttle">
+      <set value="1" var="launch"/>
+      <set value="0" var="kill_throttle"/>
+      <set value="0" var="autopilot_flight_time"/>
+    </block>
+
+    <block name="Climb">
+<!-- HIER HOEHE EINTRAGEN ! -->
+      <go wp="HOME"/> 
+      <deroute block="Survey"/>
+    </block> 
+
+
+ <!--    <block name="GoTo">
+      <go wp="HOME"/>
+    </block>
+-->
+
+    <block name="Survey">
+      <survey_rectangle wp1="Northeast" wp2="Southwest" grid="10" orientation="NS"/>
+      <deroute block="Descent"/>
+    </block>
+
+
+<!-- im Leerlauf:
+100% -> 4.2V -> 12.6 -> 16.8
+ 20% -> 3.7V -> 11.1 -> 14.8
+  0% -> 3.6V -> 10.8 -> 14.4
+nie: -> 3.3V -> 9.9  -> 13.2
+-->
+ 
+
+    <block name="Descent">
+      <circle wp="HOME" climb="-3.0" radius="80" throttle="0.30" pitch="auto" until="ground_alt+40 > GetPosAlt()" vmode="climb"/>
+<!-- HIER HOEHE EINTRAGEN ! -->
+      <exception cond="GetPosAlt() > ground_alt + 150 " deroute="Down"/>
+      <deroute block="Landing"/>
+    </block>
+
+    <block name="Down">
+     <circle wp="HOME" radius="-70" until="ground_alt+40 > GetPosAlt()" vmode="alt" alt="ground_alt+40"/>
+      <deroute block="Landing"/>
+    </block>
+
+    <block name="Landing">
+      <while cond="TRUE">
+      <go wp="Anflug" approaching_time="1"/>
+      <go from="Anflug" hmode="route" vmode="glide" wp="Touchdown" alt="ground_alt+1" approaching_time="1"/>
+      </while>
+      <deroute block="Standby"/>
+    </block>
+
+    <block name="Standby" group="home" key="Ctrl+a" strip_button="Standby" strip_icon="home.png">
+      <circle radius="-70" wp="HOME"/>
+    </block>
+ 
+  </blocks>
+</flight_plan>
