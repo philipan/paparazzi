@@ -1,21 +1,18 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="650" ground_alt="500" lat0="48.30310" lon0="10.91194" max_dist_from_home="230" name="IR_Luisenruh" security_height="30">
+<flight_plan alt="750" ground_alt="600" lat0="48.30310" lon0="10.91194" max_dist_from_home="200" name="IR_Luisenruh" security_height="30">
   <header>
 #include "subsystems/datalink/datalink.h"
 </header>
   <waypoints>
     <waypoint alt="356.0" lat="48.306105" lon="10.919974" name="HOME"/>
-    <waypoint lat="48.305954" lon="10.920935" name="Profil"/>
     <waypoint name="Anflug" x="742.0" y="313.6"/>
     <waypoint lat="48.305167" lon="10.921406" name="Eins"/>
     <waypoint lat="48.306525" lon="10.922042" name="Zwei"/>
     <waypoint lat="48.305367" lon="10.920190" name="Drei"/>
     <waypoint lat="48.306893" lon="10.920451" name="Vier"/>
     <waypoint lat="48.305536" lon="10.919012" name="Fuenf"/>
-    <waypoint lat="48.307122" lon="10.918760" name="Sechs"/>
-    <waypoint lat="48.305740" lon="10.918119" name="Sieben"/>
-  </waypoints>
+    </waypoints>
   <blocks>
     <block name="Waiting for GPS fix">
       <set value="1" var="kill_throttle"/>
@@ -34,22 +31,18 @@
       <set value="0" var="autopilot_flight_time"/>
     </block>
     <block name="Climb">
-      <circle pitch="70" radius="-60" throttle="0.80" until="GetPosAlt() > ground_alt+0100" vmode="throttle" wp="Profil"/>
+      <circle pitch="70" radius="-60" throttle="0.80" until="GetPosAlt() > ground_alt+0100" vmode="throttle" wp="wpts"/>
       <deroute block="Wegpunkte"/>
     </block>
     <block name="Wegpunkte">
       <go wp="Eins"/>
-      <path approaching_time="1" pitch="auto" throttle="0.5" wpts="Eins, Zwei, Drei, Vier, Fuenf, Sechs, Sieben"/>
-      <deroute block="Down"/>
-    </block>
-    <block name="Down">
-      <circle alt="ground_alt+40" radius="-70" until="ground_alt+35 > GetPosAlt()" vmode="alt" wp="Profil"/>
+      <path approaching_time="1" pitch="auto" throttle="0.5" wpts="Eins, Zwei, Drei, Vier, Fuenf"/>
       <deroute block="Landing"/>
     </block>
     <block name="Landing">
       <while cond="TRUE">
         <go approaching_time="0.5" wp="Anflug"/>
-        <go alt="ground_alt+15" approaching_time="1" from="Profil" hmode="route" vmode="glide" wp="Anflug"/>
+        <go alt="ground_alt+15" approaching_time="1" from="Fuenf" hmode="route" vmode="glide" wp="Anflug"/>
       </while>
     </block>
     <block name="Standby">
